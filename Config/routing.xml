@@ -1,0 +1,28 @@
+<routes xmlns="http://symfony.com/schema/routing"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://symfony.com/schema/routing http://symfony.com/schema/routing/routing-1.0.xsd">
+
+    <route id="paybox.configure.display" path="/admin/module/Paybox">
+        <default key="_controller">Paybox\Controller\ConfigurationController::displayConfigurationPage</default>
+    </route>
+
+    <route id="paybox.configure" path="/admin/module/paybox/configure" methods="post">
+        <default key="_controller">Paybox\Controller\ConfigurationController::configure</default>
+    </route>
+
+    <route id="paybox.payment.callback" path="/paybox/callback">
+        <default key="_controller">Paybox\Controller\PaymentController::processPayboxRequest</default>
+    </route>
+
+    <route id="paybox.payment.successfull" path="/paybox/success">
+        <default key="_controller">Paybox\Controller\PaymentController::processPayboxSuccessfulRequest</default>
+    </route>
+
+    <route id="paybox.payment.rejected" path="/paybox/rejected">
+        <default key="_controller">Paybox\Controller\PaymentController::processPayboxRejectedRequest</default>
+    </route>
+
+    <route id="paybox.payment.canceled" path="/paybox/cancel">
+        <default key="_controller">Paybox\Controller\PaymentController::processPayboxCanceledRequest</default>
+    </route>
+</routes>

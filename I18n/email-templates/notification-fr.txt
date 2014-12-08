@@ -1,0 +1,21 @@
+Bonjour,
+
+Ce message vous informe du résultat du paiement Paybox de la commande {$order_ref} :
+
+Etat sdu paiement : {$paybox_payment_status}
+Message : {$paybox_message}
+
+{if $order_id != 0}
+Pour accéder à cette commande dans votre back-office, merci d'utiliser le lien ci-dessous:
+
+   {url path="/admin/order/update/{$order_id}"}
+{else}
+La commande n'a pas été trouvé. Pour plus de détails, voir l'historique d'appel de l'URL IPN
+dans la page de configuration du module :
+
+   {url path="/admin/module/Paybox"}
+{/if}
+
+Bonne journée.
+
+Votre boutique {config key="store_name"}.

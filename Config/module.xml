@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module>
+    <fullnamespace>Paybox\Paybox</fullnamespace>
+    <descriptive locale="en_US">
+        <title>Pay with credit card using Paybox</title>
+    </descriptive>
+    <descriptive locale="fr_FR">
+        <title>Paiement en carte bancaire avec Paybox</title>
+    </descriptive>
+    <version>1.0.0</version>
+    <author>
+        <name>Franck Allimant</name>
+        <email>franck@cqfdev.fr</email>
+    </author>
+    <type>payment</type>
+    <thelia>2.1.0</thelia>
+    <stability>prod</stability>
+</module>

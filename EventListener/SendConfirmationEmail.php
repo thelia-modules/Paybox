@@ -1,0 +1,119 @@
+<?php
+/*************************************************************************************/
+/*                                                                                   */
+/*      Thelia 2 Paybox payment module                                               */
+/*                                                                                   */
+/*      Copyright (c) CQFDev                                                         */
+/*      email : thelia@cqfdev.fr                                                     */
+/*      web : http://www.cqfdev.fr                                                   */
+/*                                                                                   */
+/*************************************************************************************/
+
+namespace Paybox\EventListener;
+
+use Paybox\Paybox;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Thelia\Action\BaseAction;
+use Thelia\Core\Event\Order\OrderEvent;
+use Thelia\Core\Event\TheliaEvents;
+use Thelia\Core\Template\ParserInterface;
+use Thelia\Log\Tlog;
+use Thelia\Mailer\MailerFactory;
+use Thelia\Model\ConfigQuery;
+
+/**
+ * Paybox payment module
+ *
+ * @author Franck Allimant <franck@cqfdev.fr>
+ */
+class SendConfirmationEmail extends BaseAction implements EventSubscriberInterface
+{
+    /**
+     * @var MailerFactory
+     */
+    protected $mailer;
+    /**
+     * @var ParserInterface
+     */
+    protected $parser;
+
+    public function __construct(ParserInterface $parser, MailerFactory $mailer)
+    {
+        $this->parser = $parser;
+        $this->mailer = $mailer;
+    }
+
+    /**
+     * @return \Thelia\Mailer\MailerFactory
+     */
+    public function getMailer()
+    {
+        return $this->mailer;
+    }
+
+    /**
+     * Checks if we are the payment module for the order, and if the order is paid,
+     * then send a confirmation email to the customer.
+     *
+     * @param OrderEvent $event
+     * @throws \Exception
+     */
+    public function updateOrderStatus(OrderEvent $event)
+    {
+        $paybox = new Paybox();
+
+        if ($event->getOrder()->isPaid() && $paybox->isPaymentModuleFor($event->getOrder())) {
+            $contact_email = ConfigQuery::read('store_email', false);
+
+            Tlog::getInstance()->debug(
+                "Order ".$event->getOrder()->getRef().": sending confirmation email from store contact e-mail $contact_email"
+            );
+
+            if ($contact_email) {
+                $order = $event->getOrder();
+
+                $this->getMailer()->sendEmailToCustomer(
+                    Paybox::CONFIRMATION_MESSAGE_NAME,
+                    $order->getCustomer(),
+                    [
+                        'order_id' => $order->getId(),
+                        'order_ref' => $order->getRef()
+                    ]
+                );
+
+                Tlog::getInstance()->debug("Order ".$order->getRef().": confirmation email sent to customer.");
+
+                // Send now the order confirmation email to the customer
+                $event->getDispatcher()->dispatch(TheliaEvents::ORDER_SEND_CONFIRMATION_EMAIL, $event);
+            }
+        } else {
+            Tlog::getInstance()->debug(
+                "Order ".$event->getOrder()->getRef().": no confirmation email sent (order not paid, or not the proper payment module)."
+            );
+        }
+    }
+
+    /**
+     * Send the confirmation message only if the order is paid.
+     *
+     * @param OrderEvent $event
+     */
+    public function checkSendOrderConfirmationMessageToCustomer(OrderEvent $event)
+    {
+        $paybox = new Paybox();
+
+        if ($paybox->isPaymentModuleFor($event->getOrder())) {
+            if (! $event->getOrder()->isPaid()) {
+                $event->stopPropagation();
+            }
+        }
+    }
+
+    public static function getSubscribedEvents()
+    {
+        return array(
+            TheliaEvents::ORDER_UPDATE_STATUS => array("updateOrderStatus", 128),
+            TheliaEvents::ORDER_SEND_CONFIRMATION_EMAIL => array("checkSendOrderConfirmationMessageToCustomer", 10)
+        );
+    }
+}

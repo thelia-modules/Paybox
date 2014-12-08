@@ -1,0 +1,33 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" dir="ltr" lang="fr">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Paybox payment status notification for order {$order_ref}</title>
+</head>
+
+<body>
+    <div id="wrapper">
+        <p>Hello,</p>
+
+        <p>This message is a notification of the Paybox status for payment of order {$order_ref} :</p>
+
+        <ul>
+            <li>Payment status : {$paybox_payment_status}</li>
+            <li>Message : {$paybox_message}</li>
+        </ul>
+
+        {if $order_id != 0}
+            <p><a href="{url path="http://localhost/thelia2/index_dev.php/admin/order/update/{$order_id}"}">Click here</a>
+            to view this order in your back-office.</p>
+        {else}
+            <p>The order was not found. For details, please check the IPN URL call history in
+                <a href="{url path="/admin/module/Paybox"}">the module's configuration page</a>.</p>
+        {/if}
+
+        <p>Have a nice day.</p>
+
+        <p>Your shop {config key="store_name"}.</p>
+    </div>
+</body>
+</html>

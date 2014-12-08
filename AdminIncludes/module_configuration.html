@@ -1,0 +1,141 @@
+<div class="row">
+    <div class="col-md-12 general-block-decorator">
+        <div class="row">
+            <div class="col-md-12 title title-without-tabs">
+                {intl d='paybox.ai' l="Paybox Configuration"}
+            </div>
+        </div>
+
+        <div class="form-container">
+            <div class="row">
+                <div class="col-md-12">
+                {form name="paybox.configuration.form"}
+
+                <form action="{url path="/admin/module/paybox/configure"}" method="post">
+                    {form_hidden_fields form=$form}
+
+                    {include file = "includes/inner-form-toolbar.html"
+                        hide_flags = true
+                        page_url   = "{url path='/admin/module/Paybox'}"
+                        close_url  = "{url path='/admin/modules'}"
+                    }
+
+                    {if $form_error}
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="alert alert-danger">{$form_error_message}</div>
+                            </div>
+                        </div>
+                    {/if}
+
+                    <div class="row">
+                        <div class="col-md-3">
+                            <p class="title title-without-tabs">{intl d='paybox.ai' l="Accès à la plate-forme Paybox"}</p>
+
+                            {render_form_field form=$form field='numero_site'}
+                            {render_form_field form=$form field='rang_site'}
+                            {render_form_field form=$form field='identifiant_interne'}
+                            {render_form_field form=$form field='clef_privee'}
+
+                        </div>
+
+                        <div class="col-md-5">
+                            <p class="title title-without-tabs">{intl d='paybox.ai' l="Configuration des URLs"}</p>
+
+                            {render_form_field form=$form field='url_serveur'}
+                            {render_form_field form=$form field='url_serveur_test'}
+                            {render_form_field form=$form field='url_retour_abandon'}
+                            {render_form_field form=$form field='url_retour_refus'}
+                            {render_form_field form=$form field='url_retour_succes'}
+                            {render_form_field form=$form field='url_ipn'}
+
+                        </div>
+
+                        <div class="col-md-4">
+                            <p class="title title-without-tabs">{intl d='paybox.ai' l="Configuration du paiement"}</p>
+
+                            <div class="alert alert-info">
+                                <span class="glyphicon glyphicon-edit"></span>
+                                <a href="{url path="/admin/configuration/messages"}">
+                                    {intl d='paybox.ai' l='Vous pouvez aussi configurer les mails de confirmation et de notification Paybox'}
+                                </a>
+                            </div>
+
+                            {render_form_field form=$form field="send_confirmation_email_on_successful_payment"}
+                            {render_form_field form=$form field='mode'}
+                            {render_form_field form=$form field='allowed_ip_list'}
+                            {render_form_field form=$form field="minimum_amount"}
+                            {render_form_field form=$form field="maximum_amount"}
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">
+                                        <span class="glyphicon glyphicon-info-sign"></span> {intl d='paybox.ai' l="Comment générer votre clef privée ?"}
+                                    </h3>
+                                </div>
+                                <div class="panel-body">
+                                    {intl d='paybox.ai' l='<ol>
+                                        <li>
+                                            L\'interface de génération de la clé secrète d\'authentification se trouve dans l\'onglet "Informations" du Back Office Commerçant de Paybox, en bas de la page.
+                                        </li>
+                                        <li>
+                                            Le champ "Phrase de passe" peut être renseigné avec une phrase, un mot de passe, ou tout autre texte.
+                                        </li>
+                                        <li>
+                                            L\'affichage par défaut du champ "Phrase de passe" est caché, les caractères apparaissent comme un champ "mot de passe". Il est possible de choisir d\'afficher cette phrase de passe en décochant la case "Cacher".
+                                        </li>
+                                        <li>
+                                            Les champs "Complexité" et "Force" sont mis à jour automatiquement lorsque la phrase de passe est saisie. Ces champs permettent de définir des règles d\'acceptation minimales de la phrase de passe. Les règles fixées actuellement demandent une phrase de passe d\'au moins 15 caractères de long et d\'une force de 90%. Le bouton "VALIDER" restera grisé tant que ces limitations ne sont pas respectées.
+                                        </li>
+                                        <li>
+                                            Le bouton "Générer une clé" permet de calculer la clé d\'authentification à partir de la phrase de passe saisie. Ce calcul est une méthode standard assurant le caractère aléatoire de la clé et renforçant sa robustesse. Cette méthode de calcul étant fixe, il est possible à tout moment de retrouver sa clé en retapant la même phrase de passe et en relançant le calcul.<br />
+                                            Attention, il est possible que le calcul de la clé prenne quelques secondes, selon le navigateur Internet utilisé et la puissance de l\'ordinateur. Au cours du calcul, il se peut que votre navigateur demande s\'il faut "arrêter l\'exécution de ce script". Il faut répondre "Non" à cette alerte, et patienter jusqu\'à la fin du calcul.
+                                        </li>
+                                        <li>
+                                            Après validation du formulaire, un message récapitulatif sera affiché sur la page, expliquant qu\'un email de demande de confirmation a été envoyé à l\'adresse mail du Commerçant. La clé qui vient d\'être générée ne sera pas active tant que les indications de validation décrites dans cet email n\'auront pas été appliquées.
+                                        </li>
+                                        <li>
+                                            Il faut alors copier la clé d\'authentification qui se trouve dans le champ "Clé", et la coller dans le champ "Clef privée d\'échange" de la page de configuration du module Paybox (back office de Thelia -> Modules -> Paybox -> Configurer)
+                                        </li>
+                                    </ol>'}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">
+                                        <span class="glyphicon glyphicon-cog"></span>
+                                        {intl d='paybox.ai' l="Historique des appels Paybox à l'URL IPN"}
+                                    </h3>
+                                </div>
+                                <div class="panel-body">
+                                    <div id="log-container" style="font-family: monospace; font-size: 12px; max-height: 400px; overflow-y: scroll">
+                                        {$trace_content nofilter}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                {/form}
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<script>
+
+    var objDiv = document.getElementById("log-container");
+
+    objDiv.scrollTop = objDiv.scrollHeight;
+
+</script>
