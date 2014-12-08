@@ -5,6 +5,8 @@ Ce module vous permet de proposer à vos clients le système de paiement Paybox.
 
 ### Installation
 
+> Ce module requiert Thelia 2.1 beta1 au minimum
+
 Pour installer le module Paybox, décompressez l'archive dans `<racine de thelia>/local/modules`. Veillez à ce que le dossier porte le nom `Paybox` (et pas `Paybox-master`, par exemple).
 
 ### Utilisation
@@ -24,6 +26,8 @@ L'intégration est automatique, et s'appuie sur les templates standard.
 This module offers to your customers the Paybox payment system.
 
 ### Installation
+
+> This module requires Thelia 2.1 beta1 or newer
 
 To install the Paybox module, uncompress the archive in the `<thelia root>/local/modules` directory. Be sure that the name of the module's directory is `Paybox` (and not `Paybox-master`, for exemple).
 
