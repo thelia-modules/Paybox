@@ -83,8 +83,10 @@ class SendConfirmationEmail extends BaseAction implements EventSubscriberInterfa
 
                 Tlog::getInstance()->debug("Order ".$order->getRef().": confirmation email sent to customer.");
 
-                // Send now the order confirmation email to the customer
-                $event->getDispatcher()->dispatch(TheliaEvents::ORDER_SEND_CONFIRMATION_EMAIL, $event);
+                if (Paybox::getConfigValue('send_confirmation_email_on_successful_payment', false)) {
+                    // Send now the order confirmation email to the customer
+                    $event->getDispatcher()->dispatch(TheliaEvents::ORDER_SEND_CONFIRMATION_EMAIL, $event);
+                }
             }
         } else {
             Tlog::getInstance()->debug(
@@ -100,11 +102,13 @@ class SendConfirmationEmail extends BaseAction implements EventSubscriberInterfa
      */
     public function checkSendOrderConfirmationMessageToCustomer(OrderEvent $event)
     {
-        $paybox = new Paybox();
+        if (Paybox::getConfigValue('send_confirmation_email_on_successful_payment', false)) {
+            $paybox = new Paybox();
 
-        if ($paybox->isPaymentModuleFor($event->getOrder())) {
-            if (! $event->getOrder()->isPaid()) {
-                $event->stopPropagation();
+            if ($paybox->isPaymentModuleFor($event->getOrder())) {
+                if (!$event->getOrder()->isPaid()) {
+                    $event->stopPropagation();
+                }
             }
         }
     }
