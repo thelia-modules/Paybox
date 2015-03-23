@@ -120,6 +120,11 @@ class PaymentController extends BasePaymentModuleController
         $stringParam = '';
 
         foreach ($payboxRequestValues as $key => $value) {
+            // Ignore sign parameter
+            if ($key == 'sign') {
+                continue;
+            }
+            
             $stringParam .= "&".$key.'='.$value;
         }
 
