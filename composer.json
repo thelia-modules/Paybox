@@ -1,6 +1,7 @@
 {
     "name": "thelia/paybox-module",
     "description": "Thelia 2 module for the Paybox payment system",
+    "license": "LGPL-3.0+",
     "type": "thelia-module",
     "require": {
         "thelia/installer": "~1.0"
