@@ -1,0 +1,11 @@
+{
+    "name": "thelia/paybox-module",
+    "description": "Thelia 2 module for the Paybox payment system",
+    "type": "thelia-module",
+    "require": {
+        "thelia/installer": "~1.0"
+    },
+    "extra": {
+        "installer-name": "Paybox"
+    }
+}
