@@ -14,6 +14,7 @@ namespace Paybox;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Thelia\Core\HttpFoundation\Response;
 use Thelia\Core\Translation\Translator;
+use Thelia\Log\Tlog;
 use Thelia\Model\Message;
 use Thelia\Model\MessageQuery;
 use Thelia\Model\ModuleImageQuery;
@@ -259,37 +260,46 @@ class Paybox extends AbstractPaymentModule
 
     protected function getCurrencyIso4217NumericCode($textCurrencyCode)
     {
+        $currencies = null;
+
         $localIso417data = __DIR__ . DS . "Config" . DS . "iso4217.xml";
 
-        $xmlData = @file_get_contents("http://www.currency-iso.org/dam/downloads/table_a1.xml");
+        $currencyXmlDataUrl = "http://www.currency-iso.org/dam/downloads/lists/list_one.xml";
 
-        if (!$xmlData) {
-            $xmlData = @file_get_contents($localIso417data);
-        } else {
-            // Update the local currencies.
-            @file_put_contents($localIso417data, $xmlData);
-        }
+        $xmlData = @file_get_contents($currencyXmlDataUrl);
 
-        if (!$xmlData) {
-            // Last chance: get code for common currencies
-            switch ($textCurrencyCode) {
-                case 'USD':
-                    return 840;
-                case 'GBP':
-                    return 826;
-                    break;
-                case 'EUR':
-                    return 978;
-                    break;
-            }
-        } else {
+        try {
             $currencies = new \SimpleXMLElement($xmlData);
 
+            // Update the local currencies copy.
+            @file_put_contents($localIso417data, $xmlData);
+        } catch (\Exception $ex) {
+            Tlog::getInstance()->warning("Failed to get currency XML data from $currencyXmlDataUrl: ".$ex->getMessage());
+            try {
+                $currencies = new \SimpleXMLElement(@file_get_contents($localIso417data));
+            } catch (\Exception $ex) {
+                Tlog::getInstance()->warning("Failed to get currency XML data from local copy $localIso417data: ".$ex->getMessage());
+            }
+        }
+
+        if (null !== $currencies) {
             foreach ($currencies->CcyTbl->CcyNtry as $country) {
                 if ($country->Ccy == $textCurrencyCode) {
                     return (string) $country->CcyNbr;
                 }
             }
+        }
+
+        // Last chance
+        switch ($textCurrencyCode) {
+            case 'USD':
+                return 840;
+            case 'GBP':
+                return 826;
+                break;
+            case 'EUR':
+                return 978;
+                break;
         }
 
         throw new \RuntimeException(
@@ -298,7 +308,6 @@ class Paybox extends AbstractPaymentModule
                 ['%curr' => $textCurrencyCode]
             )
         );
-
     }
 
     /**
