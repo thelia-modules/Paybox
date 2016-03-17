@@ -27,20 +27,21 @@ use Thelia\Tools\URL;
  */
 class ConfigurationController extends BaseAdminController
 {
-    public function displayConfigurationPage() {
-
+    public function displayConfigurationPage()
+    {
         $logFilePath = sprintf(THELIA_ROOT."log".DS."%s.log", Paybox::MODULE_CODE);
 
-        $traces = file_get_contents($logFilePath);
+        $traces = @file_get_contents($logFilePath);
 
         if (false === $traces) {
             $traces = $this->getTranslator()->trans("Le fichier de log n'a pas été trouvé.", [], Paybox::MODULE_DOMAIN);
-        }
-        else if (empty($traces)) {
+        } elseif (empty($traces)) {
             $traces = $this->getTranslator()->trans("Le fichier de log est vide.", [], Paybox::MODULE_DOMAIN);
         }
 
-        return $this->render('module-configure', [
+        return $this->render(
+            'module-configure',
+            [
                 'module_code' => 'Paybox',
                 'trace_content' => nl2br($traces)
             ]
