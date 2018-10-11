@@ -6,6 +6,9 @@
     "require": {
         "thelia/installer": "~1.0"
     },
+    "suggest": {
+        "thelia/paybox3x-module": "This module offers to your customers the Paybox 3x payment system"
+    },
     "extra": {
         "installer-name": "Paybox"
     }
