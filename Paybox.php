@@ -125,7 +125,7 @@ class Paybox extends AbstractPaymentModule
      */
     public function pay(Order $order)
     {
-        return $this->doPay($order, 'SINGLE');
+        return $this->doPay($order);
     }
 
     /**
@@ -156,29 +156,11 @@ class Paybox extends AbstractPaymentModule
         $hashAlgo = $this->getHashAlgorithm();
         $clefPrivee = Paybox::getConfigValue('clef_privee');
 
-        // Generate a transaction ID
-        $transactionId = sprintf("%010d", $order->getId());
-
-        $order->setTransactionRef($transactionId)->save();
-
-        $paybox_params = [
-            'PBX_SITE' => Paybox::getConfigValue('numero_site'),
-            'PBX_RANG' => Paybox::getConfigValue('rang_site'),
-            'PBX_IDENTIFIANT' => Paybox::getConfigValue('identifiant_interne'),
-            'PBX_RETOUR' => self::PARAMETRES_RETOUR,
-            'PBX_HASH' => $hashAlgo,
-            'PBX_SECRET' => $clefPrivee,
-            'PBX_ANNULE' => Paybox::getConfigValue('url_retour_abandon'),
-            'PBX_EFFECTUE' => Paybox::getConfigValue('url_retour_succes'),
-            'PBX_REFUSE' => Paybox::getConfigValue('url_retour_refus'),
-            'PBX_REPONDRE_A' => Paybox::getConfigValue('url_ipn'),
-            'PBX_TOTAL' => round(100 * $order->getTotalAmount()),
-            'PBX_DEVISE' => $this->getCurrencyIso4217NumericCode($order->getCurrency()->getCode()),
-            'PBX_CMD' => $transactionId,
-            'PBX_PORTEUR' => $order->getCustomer()->getEmail(),
-            'PBX_TIME' => date("c"),
-            'PBX_RUF1' => 'POST'
-        ];
+        $paybox_params = $this->doPayPayboxParameters($order)
+            + [
+                'PBX_HASH' => $hashAlgo,
+                'PBX_SECRET' => $clefPrivee
+            ];
 
         // Generate signature
         $param = '';
@@ -194,6 +176,33 @@ class Paybox extends AbstractPaymentModule
         $paybox_params['PBX_HMAC'] = strtoupper(hash_hmac($hashAlgo, $param, $binkey));
 
         return $this->generateGatewayFormResponse($order, $platformUrl, $paybox_params);
+    }
+
+    protected function doPayPayboxParameters(Order $order)
+    {
+        // Generate a transaction ID
+        $transactionId = sprintf("%010d", $order->getId());
+
+        $order->setTransactionRef($transactionId)->save();
+
+        $paybox_params = [
+            'PBX_SITE' => Paybox::getConfigValue('numero_site'),
+            'PBX_RANG' => Paybox::getConfigValue('rang_site'),
+            'PBX_IDENTIFIANT' => Paybox::getConfigValue('identifiant_interne'),
+            'PBX_RETOUR' => self::PARAMETRES_RETOUR,
+            'PBX_ANNULE' => Paybox::getConfigValue('url_retour_abandon'),
+            'PBX_EFFECTUE' => Paybox::getConfigValue('url_retour_succes'),
+            'PBX_REFUSE' => Paybox::getConfigValue('url_retour_refus'),
+            'PBX_REPONDRE_A' => Paybox::getConfigValue('url_ipn'),
+            'PBX_TOTAL' => round(100 * $order->getTotalAmount()),
+            'PBX_DEVISE' => $this->getCurrencyIso4217NumericCode($order->getCurrency()->getCode()),
+            'PBX_CMD' => $transactionId,
+            'PBX_PORTEUR' => $order->getCustomer()->getEmail(),
+            'PBX_TIME' => date("c"),
+            'PBX_RUF1' => 'POST'
+        ];
+
+        return $paybox_params;
     }
 
     /**
