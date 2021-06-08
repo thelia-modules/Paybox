@@ -5,14 +5,6 @@
         xsi:schemaLocation="http://thelia.net/schema/dic/config http://thelia.net/schema/dic/config/thelia-1.0.xsd">
 
     <forms>
-        <form name="paybox.configuration.form" class="Paybox\Form\ConfigurationForm" />
+        <form name="paybox_configuration_form" class="Paybox\Form\ConfigurationForm" />
     </forms>
-
-    <services>
-        <service id="send.paybox.mail" class="Paybox\EventListener\SendConfirmationEmail" scope="request">
-            <argument type="service" id="thelia.parser" />
-            <argument type="service" id="mailer"/>
-            <tag name="kernel.event_subscriber"/>
-        </service>
-    </services>
 </config>

@@ -12,6 +12,7 @@
 namespace Paybox\EventListener;
 
 use Paybox\Paybox;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Thelia\Action\BaseAction;
 use Thelia\Core\Event\Order\OrderEvent;
@@ -37,10 +38,16 @@ class SendConfirmationEmail extends BaseAction implements EventSubscriberInterfa
      */
     protected $parser;
 
-    public function __construct(ParserInterface $parser, MailerFactory $mailer)
+    /**
+     * @var EventDispatcherInterface
+     */
+    protected $eventDispatcher;
+
+    public function __construct(ParserInterface $parser, MailerFactory $mailer, EventDispatcherInterface $eventDispatcher)
     {
         $this->parser = $parser;
         $this->mailer = $mailer;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     /**
@@ -85,7 +92,7 @@ class SendConfirmationEmail extends BaseAction implements EventSubscriberInterfa
 
                 if (Paybox::getConfigValue('send_confirmation_email_on_successful_payment', false)) {
                     // Send now the order confirmation email to the customer
-                    $event->getDispatcher()->dispatch(TheliaEvents::ORDER_SEND_CONFIRMATION_EMAIL, $event);
+                    $this->eventDispatcher->dispatch($event, TheliaEvents::ORDER_SEND_CONFIRMATION_EMAIL);
                 }
             }
         } else {

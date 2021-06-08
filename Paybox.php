@@ -12,6 +12,7 @@
 namespace Paybox;
 
 use Propel\Runtime\Connection\ConnectionInterface;
+use Symfony\Component\DependencyInjection\Loader\Configurator\ServicesConfigurator;
 use Thelia\Core\HttpFoundation\Response;
 use Thelia\Core\Translation\Translator;
 use Thelia\Log\Tlog;
@@ -46,7 +47,7 @@ class Paybox extends AbstractPaymentModule
     /**
      * @inheritdoc
      */
-    public function postActivation(ConnectionInterface $con = null)
+    public function postActivation(ConnectionInterface $con = null): void
     {
         // Create payment confirmation message from templates, if not already defined
         $email_templates_dir = __DIR__ . DS . 'I18n' . DS . 'email-templates' . DS;
@@ -93,16 +94,12 @@ class Paybox extends AbstractPaymentModule
 
         /* Deploy the module's image */
         $module = $this->getModuleModel();
-
-        if (ModuleImageQuery::create()->filterByModule($module)->count() == 0) {
-            $this->deployImageFolder($module, sprintf('%s'.DS.'images', __DIR__), $con);
-        }
     }
 
     /**
      * @inheritdoc
      */
-    public function destroy(ConnectionInterface $con = null, $deleteModuleData = false)
+    public function destroy(ConnectionInterface $con = null, $deleteModuleData = false): void
     {
         // Delete config table and messages if required
         if ($deleteModuleData) {
@@ -350,5 +347,13 @@ class Paybox extends AbstractPaymentModule
                 "Failed to find a suitable hash algorithm. Please check your PHP configuration."
             )
         );
+    }
+
+    public static function configureServices(ServicesConfigurator $servicesConfigurator): void
+    {
+        $servicesConfigurator->load(self::getModuleCode().'\\', __DIR__)
+            ->exclude([THELIA_MODULE_DIR . ucfirst(self::getModuleCode()). "/I18n/*"])
+            ->autowire(true)
+            ->autoconfigure(true);
     }
 }

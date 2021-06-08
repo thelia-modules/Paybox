@@ -12,6 +12,11 @@
 namespace Paybox\Form;
 
 use Paybox\Paybox;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Url as UrlValidator;
@@ -30,7 +35,7 @@ class ConfigurationForm extends BaseForm
         $this->formBuilder
             ->add(
                 'numero_site',
-                'text',
+                TextType::class,
                 [
                     'constraints' => [new NotBlank()],
                     'label' => $this->translator->trans('Numéro du site', [], Paybox::MODULE_DOMAIN),
@@ -43,7 +48,7 @@ class ConfigurationForm extends BaseForm
             )
             ->add(
                 'rang_site',
-                'text',
+                TextType::class,
                 [
                     'constraints' => [ new NotBlank() ],
                     'label' => $this->translator->trans('Numéro de rang', [], Paybox::MODULE_DOMAIN),
@@ -56,7 +61,7 @@ class ConfigurationForm extends BaseForm
             )
             ->add(
                 'identifiant_interne',
-                'text',
+                TextType::class,
                 [
                     'constraints' => [ new NotBlank() ],
                     'label' => $this->translator->trans('Identifiant interne', [], Paybox::MODULE_DOMAIN),
@@ -69,7 +74,7 @@ class ConfigurationForm extends BaseForm
             )
             ->add(
                 'clef_privee',
-                'text',
+                TextType::class,
                 array(
                     'constraints' => [ new NotBlank() ],
                     'label' => $this->translator->trans('Clef privée d\'échange', [], Paybox::MODULE_DOMAIN),
@@ -82,7 +87,7 @@ class ConfigurationForm extends BaseForm
             )
             ->add(
                 'url_serveur',
-                'url',
+                UrlType::class,
                 [
                     'constraints' => [ new NotBlank(), new UrlValidator() ],
                     'label' => $this->translator->trans('URL de production du serveur Paybox', [], Paybox::MODULE_DOMAIN),
@@ -95,7 +100,7 @@ class ConfigurationForm extends BaseForm
             )
             ->add(
                 'url_serveur_test',
-                'url',
+                UrlType::class,
                 [
                     'constraints' => [ new NotBlank(), new UrlValidator() ],
                     'label' => $this->translator->trans('URL de test du serveur Paybox', [], Paybox::MODULE_DOMAIN),
@@ -108,7 +113,7 @@ class ConfigurationForm extends BaseForm
             )
             ->add(
                 'url_retour_abandon',
-                'url',
+                UrlType::class,
                 [
                     'constraints' => [ new NotBlank(), new UrlValidator() ],
                     'label' => $this->translator->trans('URL de retour en cas d\'abandon', [], Paybox::MODULE_DOMAIN),
@@ -121,7 +126,7 @@ class ConfigurationForm extends BaseForm
             )
             ->add(
                 'url_retour_succes',
-                'url',
+                UrlType::class,
                 [
                     'constraints' => [ new NotBlank(), new UrlValidator() ],
                     'label' => $this->translator->trans('URL de retour après un paiement réussi', [], Paybox::MODULE_DOMAIN),
@@ -134,7 +139,7 @@ class ConfigurationForm extends BaseForm
             )
             ->add(
                 'url_retour_refus',
-                'url',
+                UrlType::class,
                 [
                     'constraints' => [ new NotBlank(), new UrlValidator() ],
                     'label' => $this->translator->trans('URL de retour en cas de rejet du paiement', [], Paybox::MODULE_DOMAIN),
@@ -147,7 +152,7 @@ class ConfigurationForm extends BaseForm
             )
             ->add(
                 'url_ipn',
-                'url',
+                UrlType::class,
                 [
                     'constraints' => [ new NotBlank(), new UrlValidator() ],
                     'label' => $this->translator->trans('URL IPN', [], Paybox::MODULE_DOMAIN),
@@ -163,12 +168,12 @@ class ConfigurationForm extends BaseForm
             )
             ->add(
                 'mode',
-                'choice',
+                ChoiceType::class,
                 [
                     'constraints' => [ new NotBlank() ],
                     'choices' => [
-                        'TEST' => $this->translator->trans('Test', [], Paybox::MODULE_DOMAIN),
-                        'PRODUCTION' => $this->translator->trans('Production', [], Paybox::MODULE_DOMAIN),
+                        $this->translator->trans('Test', [], Paybox::MODULE_DOMAIN) => 'TEST',
+                        $this->translator->trans('Production', [], Paybox::MODULE_DOMAIN) => 'PRODUCTION',
                     ],
                     'label' => $this->translator->trans('Mode de fonctionnement', [], Paybox::MODULE_DOMAIN),
                     'data' => Paybox::getConfigValue('mode', 'TEST'),
@@ -181,7 +186,7 @@ class ConfigurationForm extends BaseForm
 
             ->add(
                 'allowed_ip_list',
-                'textarea',
+                TextareaType::class,
                 [
                     'required' => false,
                     'label' => $this->translator->trans('Adresses IP autorisées en mode test', [], Paybox::MODULE_DOMAIN),
@@ -201,7 +206,7 @@ class ConfigurationForm extends BaseForm
             )
             ->add(
                 'minimum_amount',
-                'text',
+                TextType::class,
                 [
                     'constraints' => [
                         new NotBlank(),
@@ -217,7 +222,7 @@ class ConfigurationForm extends BaseForm
             )
             ->add(
                 'maximum_amount',
-                'text',
+                TextType::class,
                 [
                     'constraints' => [
                         new NotBlank(),
@@ -233,7 +238,7 @@ class ConfigurationForm extends BaseForm
             )
             ->add(
                 'send_confirmation_email_on_successful_payment',
-                'checkbox',
+                CheckboxType::class,
                 [
                     'required' => false,
                     'label' => $this->translator->trans('Envoi du mail de confirmation de commande sur paiement réussi', [], Paybox::MODULE_DOMAIN),
@@ -247,7 +252,7 @@ class ConfigurationForm extends BaseForm
         ;
     }
 
-    public function getName()
+    public static function getName()
     {
         return 'paybox_configuration_form';
     }
