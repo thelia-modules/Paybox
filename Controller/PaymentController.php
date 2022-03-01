@@ -12,6 +12,7 @@
 namespace Paybox\Controller;
 
 use Paybox\Paybox;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Thelia\Core\HttpFoundation\Response;
 use Thelia\Module\BasePaymentModuleController;
 
@@ -88,7 +89,7 @@ class PaymentController extends BasePaymentModuleController
     /**
      * Process a Paybox platform request
      */
-    public function processPayboxRequest()
+    public function processPayboxRequest(EventDispatcherInterface $eventDispatcher)
     {
         // The response code to the server
         $request = $this->getRequest();
@@ -154,7 +155,7 @@ class PaymentController extends BasePaymentModuleController
                         $orderStatus = $this->getTranslator()->trans('PAID', [], Paybox::MODULE_DOMAIN);
 
                         if (!$order->isPaid()) {
-                            $this->confirmPayment($orderId);
+                            $this->confirmPayment($eventDispatcher, $orderId);
 
                             $message = $this->getTranslator()->trans(
                                 "Order ID %id is confirmed.",
