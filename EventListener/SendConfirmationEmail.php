@@ -73,10 +73,10 @@ class SendConfirmationEmail extends BaseAction implements EventSubscriberInterfa
             $contact_email = ConfigQuery::read('store_email', false);
 
             Tlog::getInstance()->debug(
-                "Order ".$event->getOrder()->getRef().": sending confirmation email from store contact e-mail $contact_email"
+                "Order " . $event->getOrder()->getRef() . ": sending confirmation email from store contact e-mail $contact_email"
             );
 
-            if ($contact_email) {
+            if ($contact_email && Paybox::getConfigValue('send_confirmation_email_on_successful_payment', false)) {
                 $order = $event->getOrder();
 
                 $this->getMailer()->sendEmailToCustomer(
@@ -88,16 +88,13 @@ class SendConfirmationEmail extends BaseAction implements EventSubscriberInterfa
                     ]
                 );
 
-                Tlog::getInstance()->debug("Order ".$order->getRef().": confirmation email sent to customer.");
+                Tlog::getInstance()->debug("Order " . $order->getRef() . ": confirmation email sent to customer.");
 
-                if (Paybox::getConfigValue('send_confirmation_email_on_successful_payment', false)) {
-                    // Send now the order confirmation email to the customer
-                    $this->eventDispatcher->dispatch($event, TheliaEvents::ORDER_SEND_CONFIRMATION_EMAIL);
-                }
+                $this->eventDispatcher->dispatch($event, TheliaEvents::ORDER_SEND_CONFIRMATION_EMAIL);
             }
         } else {
             Tlog::getInstance()->debug(
-                "Order ".$event->getOrder()->getRef().": no confirmation email sent (order not paid, or not the proper payment module)."
+                "Order " . $event->getOrder()->getRef() . ": no confirmation email sent (order not paid, or not the proper payment module)."
             );
         }
     }
