@@ -213,7 +213,7 @@ class PaymentController extends BasePaymentModuleController
 
         $this->sendPaymentNotification($orderId, $orderReference, $orderStatus, $message);
 
-        return Response::create('');
+        return new Response('');
     }
 
     public function processPayboxSuccessfulRequest()
