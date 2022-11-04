@@ -211,7 +211,7 @@ class PaymentController extends BasePaymentModuleController
             )
         );
 
-        $this->sendPaymentNotification($orderId, $orderReference, $orderStatus, $message);
+        /*$this->sendPaymentNotification($orderId, $orderReference, $orderStatus, $message);*/
 
         return new Response('');
     }
