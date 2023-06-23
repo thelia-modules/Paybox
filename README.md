@@ -3,6 +3,8 @@
 
 Ce module vous permet de proposer à vos clients le système de paiement Paybox.
 
+> Compatible 3Dsv2
+
 ### Installation
 
 > Ce module requiert Thelia 2.1 beta1 au minimum
@@ -28,6 +30,8 @@ This module offers to your customers the Paybox payment system.
 ### Installation
 
 > This module requires Thelia 2.1 beta1 or newer
+
+> Compatible 3Dsv2
 
 To install the Paybox module, uncompress the archive in the `<thelia root>/local/modules` directory. Be sure that the name of the module's directory is `Paybox` (and not `Paybox-master`, for exemple).
 
