@@ -18,7 +18,6 @@ use Thelia\Core\Translation\Translator;
 use Thelia\Log\Tlog;
 use Thelia\Model\Message;
 use Thelia\Model\MessageQuery;
-use Thelia\Model\ModuleImageQuery;
 use Thelia\Model\Order;
 use Thelia\Module\AbstractPaymentModule;
 
@@ -120,7 +119,7 @@ class Paybox extends AbstractPaymentModule
      * @param  Order $order processed order
      * @return Response the HTTP response
      */
-    public function pay(Order $order)
+    public function pay(Order $order): Response
     {
         return $this->doPay($order);
     }
@@ -131,9 +130,9 @@ class Paybox extends AbstractPaymentModule
      * @param  Order $order processed order
      * @return Response the HTTP response
      */
-    protected function doPay(Order $order)
+    protected function doPay(Order $order): Response
     {
-        if ('TEST' == Paybox::getConfigValue('mode', false)) {
+        if ('TEST' === Paybox::getConfigValue('mode', false)) {
             $platformUrl = Paybox::getConfigValue('url_serveur_test', false);
         } else {
             $platformUrl = Paybox::getConfigValue('url_serveur', false);
@@ -175,7 +174,7 @@ class Paybox extends AbstractPaymentModule
         return $this->generateGatewayFormResponse($order, $platformUrl, $paybox_params);
     }
 
-    protected function doPayPayboxParameters(Order $order)
+    protected function doPayPayboxParameters(Order $order): array
     {
         // Generate a transaction ID
         $transactionId = sprintf("%010d", $order->getId());
@@ -196,23 +195,57 @@ class Paybox extends AbstractPaymentModule
             'PBX_CMD' => $transactionId,
             'PBX_PORTEUR' => $order->getCustomer()->getEmail(),
             'PBX_TIME' => date("c"),
-            'PBX_RUF1' => 'POST'
+            'PBX_RUF1' => 'POST',
+            'PBX_SHOPPINGCART' => $this->getShoppingCart($order),
+            'PBX_BILLING' => $this->getBilling($order)
         ];
 
         return $paybox_params;
     }
 
+    protected function getBilling(Order $order): array|bool|string
+    {
+        $address =  $order->getOrderAddressRelatedByInvoiceOrderAddressId();
+
+        $billingXml = new \SimpleXMLElement('<Billing/>');
+        $addressXml = $billingXml->addChild('Address');
+
+        $addressXml?->addChild('FirstName', $address->getFirstname());
+        $addressXml?->addChild('LastName', $address->getLastname());
+        $addressXml?->addChild('Address1', $address->getAddress1());
+        $addressXml?->addChild('ZipCode', $address->getZipcode());
+        $addressXml?->addChild('City', $address->getCity());
+        $addressXml?->addChild('CountryCode',  $address->getCountry()->getIsocode());
+
+        return str_replace(["\n", "\r"], '', $billingXml->asXML());
+    }
+
+    protected function getShoppingCart(Order $order): array|bool|string
+    {
+        $quantity = 0;
+        $shoppingCartXml = new \SimpleXMLElement('<shoppingcart/>');
+
+        foreach ($order->getOrderProducts() as $product) {
+            $quantity += $product->getQuantity();
+        }
+
+        $total = $shoppingCartXml->addChild('total');
+        $total?->addChild('totalQuantity', $quantity);
+
+        return str_replace(["\n", "\r"], '', $shoppingCartXml->asXML());
+    }
+
     /**
      * @return boolean true to allow usage of this payment module, false otherwise.
      */
-    public function isValidPayment()
+    public function isValidPayment(): bool
     {
         $valid = false;
 
         $mode = Paybox::getConfigValue('mode', false);
 
         // If we're in test mode, do not display Paybox on the front office, except for allowed IP addresses.
-        if ('TEST' == $mode) {
+        if ('TEST' === $mode) {
             $raw_ips = explode("\n", Paybox::getConfigValue('allowed_ip_list', ''));
 
             $allowed_client_ips = array();
@@ -224,7 +257,7 @@ class Paybox extends AbstractPaymentModule
             $client_ip = $this->getRequest()->getClientIp();
 
             $valid = in_array($client_ip, $allowed_client_ips);
-        } elseif ('PRODUCTION' == $mode) {
+        } elseif ('PRODUCTION' === $mode) {
             $valid = true;
         }
 
@@ -241,7 +274,7 @@ class Paybox extends AbstractPaymentModule
      *
      * @return bool true if the current order total is within the min and max limits
      */
-    protected function checkMinMaxAmount()
+    protected function checkMinMaxAmount(): bool
     {
         // Check if total order amount is in the module's limits
         $order_total = $this->getCurrentOrderTotalAmount();
@@ -264,7 +297,7 @@ class Paybox extends AbstractPaymentModule
      * @throw \RuntimeException if no algorithm was found.
      */
 
-    protected function getCurrencyIso4217NumericCode($textCurrencyCode)
+    protected function getCurrencyIso4217NumericCode($textCurrencyCode): int|string
     {
         $currencies = null;
 
@@ -322,7 +355,7 @@ class Paybox extends AbstractPaymentModule
      * @return string the algorithm
      * @throw \RuntimeException if no algorithm was found.
      */
-    protected function getHashAlgorithm()
+    protected function getHashAlgorithm(): string
     {
         // Possible hashes
         $hashes = [
