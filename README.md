@@ -2,7 +2,7 @@
 ----------
 
 Ce module vous permet de proposer à vos clients le système de paiement Paybox.
-
+> Compatible 3DSv2
 ### Installation
 
 > Ce module requiert Thelia 2.1 beta1 au minimum
