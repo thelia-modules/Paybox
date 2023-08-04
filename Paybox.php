@@ -190,7 +190,7 @@ class Paybox extends AbstractPaymentModule
             'PBX_EFFECTUE' => Paybox::getConfigValue('url_retour_succes'),
             'PBX_REFUSE' => Paybox::getConfigValue('url_retour_refus'),
             'PBX_REPONDRE_A' => Paybox::getConfigValue('url_ipn'),
-            'PBX_TOTAL' => round(100 * $order->getTotalAmount()),
+            'PBX_TOTAL' => round(100 * $this->getOrderPayTotalAmount($order)),
             'PBX_DEVISE' => $this->getCurrencyIso4217NumericCode($order->getCurrency()->getCode()),
             'PBX_CMD' => $transactionId,
             'PBX_PORTEUR' => $order->getCustomer()->getEmail(),
