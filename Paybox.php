@@ -210,11 +210,11 @@ class Paybox extends AbstractPaymentModule
         $billingXml = new \SimpleXMLElement('<Billing/>');
         $addressXml = $billingXml->addChild('Address');
 
-        $addressXml?->addChild('FirstName', $address->getFirstname());
-        $addressXml?->addChild('LastName', $address->getLastname());
-        $addressXml?->addChild('Address1', $address->getAddress1());
+        $addressXml?->addChild('FirstName', htmlentities($address->getFirstname()));
+        $addressXml?->addChild('LastName', htmlentities($address->getLastname()));
+        $addressXml?->addChild('Address1', htmlentities($address->getAddress1()));
         $addressXml?->addChild('ZipCode', $address->getZipcode());
-        $addressXml?->addChild('City', $address->getCity());
+        $addressXml?->addChild('City', htmlentities($address->getCity()));
         $addressXml?->addChild('CountryCode',  $address->getCountry()->getIsocode());
 
         return str_replace(["\n", "\r"], '', $billingXml->asXML());
