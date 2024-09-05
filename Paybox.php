@@ -11,10 +11,13 @@
 
 namespace Paybox;
 
+use libphonenumber\NumberParseException;
+use libphonenumber\PhoneNumberUtil;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ServicesConfigurator;
 use Thelia\Core\HttpFoundation\Response;
 use Thelia\Core\Translation\Translator;
+use Thelia\Exception\TheliaProcessException;
 use Thelia\Log\Tlog;
 use Thelia\Model\Message;
 use Thelia\Model\MessageQuery;
@@ -205,19 +208,49 @@ class Paybox extends AbstractPaymentModule
 
     protected function getBilling(Order $order): array|bool|string
     {
-        $address =  $order->getOrderAddressRelatedByInvoiceOrderAddressId();
+        $address = $order->getOrderAddressRelatedByInvoiceOrderAddressId();
 
-        $billingXml = new \SimpleXMLElement('<Billing/>');
-        $addressXml = $billingXml->addChild('Address');
+        // Decode phone number
+        $phoneNumber = empty($address->getCellphone()) ? $address->getPhone() : $address->getCellphone();
 
-        $addressXml?->addChild('FirstName', $address->getFirstname());
-        $addressXml?->addChild('LastName', $address->getLastname());
-        $addressXml?->addChild('Address1', $address->getAddress1());
-        $addressXml?->addChild('ZipCode', $address->getZipcode());
-        $addressXml?->addChild('City', $address->getCity());
-        $addressXml?->addChild('CountryCode',  $address->getCountry()->getIsocode());
+        $phoneUtil = PhoneNumberUtil::getInstance();
 
-        return str_replace(["\n", "\r"], '', $billingXml->asXML());
+        try {
+            if (null === $phoneNumberProto = $phoneUtil->parse($phoneNumber, $address->getCountry()->getIsoalpha2())) {
+                throw new TheliaProcessException(
+                    Translator::getInstance()->trans(
+                        'Invalid phone number %num for country %country',
+                        [
+                            '%num' => $phoneNumber,
+                            '%country' => $address->getCountry()->setLocale($this->getRequest()->getSession()->getLang()->getLocale())->getTitle(),
+                        ],
+                        self::MODULE_DOMAIN
+                    )
+                );
+            }
+
+            $billingXml = new \SimpleXMLElement('<Billing/>');
+            $addressXml = $billingXml->addChild('Address');
+
+            $addressXml->addChild('FirstName', $address->getFirstname());
+            $addressXml->addChild('LastName', $address->getLastname());
+            $addressXml->addChild('Address1', $address->getAddress1());
+            $addressXml->addChild('ZipCode', $address->getZipcode());
+            $addressXml->addChild('City', $address->getCity());
+            $addressXml->addChild('CountryCode', $address->getCountry()->getIsocode());
+            $addressXml->addChild('CountryCodeMobilePhone', '+'.$phoneNumberProto->getCountryCode());
+            $addressXml->addChild('MobilePhone', $phoneNumberProto->getNationalNumber());
+
+            return str_replace(["\n", "\r"], '', $billingXml->asXML());
+        } catch (NumberParseException $e) {
+            throw new TheliaProcessException(
+                Translator::getInstance()->trans(
+                    'Please enter a valid phone number in your invoice address (error is : %err)',
+                    ['%err' => $e->getMessage()],
+                    self::MODULE_DOMAIN
+                )
+            );
+        }
     }
 
     protected function getShoppingCart(Order $order): array|bool|string

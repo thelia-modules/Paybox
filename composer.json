@@ -4,12 +4,18 @@
     "license": "LGPL-3.0+",
     "type": "thelia-module",
     "require": {
-        "thelia/installer": "~1.0"
+        "thelia/installer": "~1.0",
+        "giggsey/libphonenumber-for-php": "^8.13"
     },
     "suggest": {
         "thelia/paybox3x-module": "This module offers to your customers the Paybox 3x payment system"
     },
     "extra": {
         "installer-name": "Paybox"
+    },
+    "config": {
+        "allow-plugins": {
+            "thelia/installer": true
+        }
     }
 }
