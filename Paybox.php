@@ -37,19 +37,19 @@ use Thelia\Module\AbstractPaymentModule;
 class Paybox extends AbstractPaymentModule
 {
     /** The module domain for internationalisation */
-    public const MODULE_DOMAIN = 'paybox';
+    const MODULE_DOMAIN = 'paybox';
 
     /** The module domain for internationalisation */
-    public const MODULE_CODE = 'Paybox';
+    const MODULE_CODE = 'Paybox';
 
     /** The confirmation message identifier */
-    public const CONFIRMATION_MESSAGE_NAME = 'paybox_payment_confirmation';
+    const CONFIRMATION_MESSAGE_NAME = 'paybox_payment_confirmation';
 
     // Liste des variables retournées par paybox
-    public const PARAMETRES_RETOUR = 'montant:M;ref:R;auto:A;trans:T;erreur:E;sign:K';
+    const PARAMETRES_RETOUR = 'montant:M;ref:R;auto:A;trans:T;erreur:E;sign:K';
 
     /** The notification of payment confirmation */
-    public const NOTIFICATION_MESSAGE_NAME = 'paybox_payment_status_notification';
+    const NOTIFICATION_MESSAGE_NAME = 'paybox_payment_status_notification';
 
     public function postActivation(ConnectionInterface $con = null): void
     {
