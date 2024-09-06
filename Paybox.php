@@ -22,7 +22,6 @@ use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\PropelException;
 use Thelia\Core\HttpFoundation\Response;
 use Thelia\Core\Translation\Translator;
-use Thelia\Exception\TheliaProcessException;
 use Thelia\Log\Tlog;
 use Thelia\Model\Message;
 use Thelia\Model\MessageQuery;
@@ -38,19 +37,19 @@ use Thelia\Module\AbstractPaymentModule;
 class Paybox extends AbstractPaymentModule
 {
     /** The module domain for internationalisation */
-    const MODULE_DOMAIN = 'paybox';
+    public const MODULE_DOMAIN = 'paybox';
 
     /** The module domain for internationalisation */
-    const MODULE_CODE = 'Paybox';
+    public const MODULE_CODE = 'Paybox';
 
     /** The confirmation message identifier */
-    const CONFIRMATION_MESSAGE_NAME = 'paybox_payment_confirmation';
+    public const CONFIRMATION_MESSAGE_NAME = 'paybox_payment_confirmation';
 
     // Liste des variables retournées par paybox
-    const PARAMETRES_RETOUR = 'montant:M;ref:R;auto:A;trans:T;erreur:E;sign:K';
+    public const PARAMETRES_RETOUR = 'montant:M;ref:R;auto:A;trans:T;erreur:E;sign:K';
 
     /** The notification of payment confirmation */
-    const NOTIFICATION_MESSAGE_NAME = 'paybox_payment_status_notification';
+    public const NOTIFICATION_MESSAGE_NAME = 'paybox_payment_status_notification';
 
     public function postActivation(ConnectionInterface $con = null): void
     {
@@ -226,42 +225,32 @@ class Paybox extends AbstractPaymentModule
 
         $phoneUtil = PhoneNumberUtil::getInstance();
 
+        // Default values
+        $phoneCountryCode = '00';
+        $phoneNationalNumber = '00000000';
+
         try {
-            if (null === $phoneNumberProto = $phoneUtil->parse($phoneNumber, $address->getCountry()->getIsoalpha2())) {
-                throw new TheliaProcessException(
-                    Translator::getInstance()->trans(
-                        'Invalid phone number %num for country %country',
-                        [
-                            '%num' => $phoneNumber,
-                            '%country' => $address->getCountry()->setLocale($this->getRequest()->getSession()->getLang()->getLocale())->getTitle(),
-                        ],
-                        self::MODULE_DOMAIN
-                    )
-                );
-            }
+            $phoneNumberProto = $phoneUtil->parse($phoneNumber, $address->getCountry()->getIsoalpha2());
 
-            $billingXml = new \SimpleXMLElement('<Billing/>');
-            $addressXml = $billingXml->addChild('Address');
-
-            $addressXml->addChild('FirstName', $address->getFirstname());
-            $addressXml->addChild('LastName', $address->getLastname());
-            $addressXml->addChild('Address1', $address->getAddress1());
-            $addressXml->addChild('ZipCode', $address->getZipcode());
-            $addressXml->addChild('City', $address->getCity());
-            $addressXml->addChild('CountryCode', $address->getCountry()->getIsocode());
-            $addressXml->addChild('CountryCodeMobilePhone', '+'.$phoneNumberProto->getCountryCode());
-            $addressXml->addChild('MobilePhone', $phoneNumberProto->getNationalNumber());
-
-            return str_replace(["\n", "\r"], '', $billingXml->asXML());
+            $phoneNationalNumber = $phoneNumberProto?->getNationalNumber();
+            $phoneCountryCode = $phoneNumberProto?->getCountryCode();
         } catch (NumberParseException $e) {
-            throw new TheliaProcessException(
-                Translator::getInstance()->trans(
-                    'Please enter a valid phone number in your invoice address (error is : %err)',
-                    ['%err' => $e->getMessage()],
-                    self::MODULE_DOMAIN
-                )
-            );
+            Tlog::getInstance()->error('Failed to parse phone number "'.$phoneNumber.'", error is : '.$e->getMessage());
         }
+
+        $billingXml = new \SimpleXMLElement('<Billing/>');
+        $addressXml = $billingXml->addChild('Address');
+
+        $addressXml->addChild('FirstName', $address->getFirstname());
+        $addressXml->addChild('LastName', $address->getLastname());
+        $addressXml->addChild('Address1', $address->getAddress1());
+        $addressXml->addChild('ZipCode', $address->getZipcode());
+        $addressXml->addChild('City', $address->getCity());
+        $addressXml->addChild('CountryCode', $address->getCountry()->getIsocode());
+        $addressXml->addChild('CountryCodeMobilePhone', '+'.$phoneCountryCode);
+        $addressXml->addChild('MobilePhone', $phoneNationalNumber);
+
+        return str_replace(["\n", "\r"], '', $billingXml->asXML());
     }
 
     /**

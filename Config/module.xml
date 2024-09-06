@@ -7,7 +7,7 @@
     <descriptive locale="fr_FR">
         <title>Paiement en carte bancaire avec Paybox</title>
     </descriptive>
-    <version>1.2.2</version>
+    <version>1.2.3</version>
     <author>
         <name>Franck Allimant</name>
         <email>franck@cqfdev.fr</email>
