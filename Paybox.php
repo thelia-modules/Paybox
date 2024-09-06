@@ -232,8 +232,8 @@ class Paybox extends AbstractPaymentModule
         try {
             $phoneNumberProto = $phoneUtil->parse($phoneNumber, $address->getCountry()->getIsoalpha2());
 
-            $phoneNationalNumber = $phoneNumberProto?->getNationalNumber();
-            $phoneCountryCode = $phoneNumberProto?->getCountryCode();
+            $phoneNationalNumber = $phoneNumberProto->getNationalNumber();
+            $phoneCountryCode = $phoneNumberProto->getCountryCode();
         } catch (NumberParseException $e) {
             Tlog::getInstance()->error('Failed to parse phone number "'.$phoneNumber.'", error is : '.$e->getMessage());
         }
