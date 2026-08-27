@@ -12,8 +12,8 @@
 namespace Paybox\Controller;
 
 use Paybox\Paybox;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
-use Thelia\Core\HttpFoundation\Response;
 use Thelia\Module\BasePaymentModuleController;
 
 /**
@@ -23,7 +23,7 @@ use Thelia\Module\BasePaymentModuleController;
  */
 class PaymentController extends BasePaymentModuleController
 {
-    protected function getModuleCode()
+    protected function getModuleCode(): string
     {
         return Paybox::MODULE_CODE;
     }
@@ -216,42 +216,24 @@ class PaymentController extends BasePaymentModuleController
         return new Response('');
     }
 
-    public function processPayboxSuccessfulRequest()
+    public function processPayboxSuccessfulRequest(): void
     {
-        $url = $this->getRouteFromRouter(
-            'router.front',
-            'order.placed',
-            [ 'order_id' => intval($this->getRequest()->get('ref')) ]
-        );
-
-        return $this->generateRedirect($url);
+        $this->redirectToSuccessPage(intval($this->getRequest()->get('ref')));
     }
 
-    public function processPayboxRejectedRequest()
+    public function processPayboxRejectedRequest(): void
     {
-        $url = $this->getRouteFromRouter(
-            'router.front',
-            'order.failed',
-            [
-                'order_id' => intval($this->getRequest()->get('ref')),
-                'message' => $this->getTranslator()->trans("Your payment was rejected.", [], Paybox::MODULE_DOMAIN)
-            ]
+        $this->redirectToFailurePage(
+            intval($this->getRequest()->get('ref')),
+            $this->getTranslator()->trans("Your payment was rejected.", [], Paybox::MODULE_DOMAIN)
         );
-
-        return $this->generateRedirect($url);
     }
 
-    public function processPayboxCanceledRequest()
+    public function processPayboxCanceledRequest(): void
     {
-        $url = $this->getRouteFromRouter(
-            'router.front',
-            'order.failed',
-            [
-                'order_id' => intval($this->getRequest()->get('ref')),
-                'message' => $this->getTranslator()->trans("Your payment was canceled.", [], Paybox::MODULE_DOMAIN)
-            ]
+        $this->redirectToFailurePage(
+            intval($this->getRequest()->get('ref')),
+            $this->getTranslator()->trans("Your payment was canceled.", [], Paybox::MODULE_DOMAIN)
         );
-
-        return $this->generateRedirect($url);
     }
 }
