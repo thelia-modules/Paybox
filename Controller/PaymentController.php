@@ -12,8 +12,8 @@
 namespace Paybox\Controller;
 
 use Paybox\Paybox;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
-use Thelia\Core\HttpFoundation\Response;
 use Thelia\Module\BasePaymentModuleController;
 
 /**
@@ -23,7 +23,7 @@ use Thelia\Module\BasePaymentModuleController;
  */
 class PaymentController extends BasePaymentModuleController
 {
-    protected function getModuleCode()
+    protected function getModuleCode(): string
     {
         return Paybox::MODULE_CODE;
     }
